@@ -1,4 +1,5 @@
 %option noyywrap
+%x state_string
 
 %{
 #include<stdio.h>
@@ -9,12 +10,19 @@
 using namespace std;
 
 int line_count=1;
+string taking_string = "";
 
 FILE *logout;
 FILE *tokenout;
 
 void printToken(string type, char* id){
     cout << type << ", " << id << endl;
+    // printf("%s, %s\n", type, id);
+}
+
+
+void printString(string type, string str){
+    cout << type << ", " << str << endl;
     // printf("%s, %s\n", type, id);
 }
 
@@ -45,6 +53,51 @@ char convertStringToChar(string str){
     return ' ';
 }
 
+string fixString(string str){
+    for(int i = 0; i < str.size(); i++){
+        if(str[i] == '\\' && str[i+1] == 't'){
+            str.erase(i + 1, 1);
+            str[i] = '\t';
+        }
+        else if(str[i] == '\\' && str[i+1] == 'n'){
+            str.erase(i + 1, 1);
+            str[i] = '\n';
+        }
+        else if(str[i] == '\\' && str[i+1] == '\"'){
+            str.erase(i + 1, 1);
+            str[i] = '\"';
+        }
+        else if(str[i] == '\\' && str[i+1] == '\''){
+            str.erase(i + 1, 1);
+            str[i] = '\'';
+        }
+        else if(str[i] == '\\' && str[i+1] == '\\'){
+            str.erase(i + 1, 1);
+            str[i] = '\\';
+        }
+        else if(str[i] == '\\' && str[i+1] == 'b'){
+            str.erase(i + 1, 1);
+            str[i] = '\b';
+        }
+        else if(str[i] == '\\' && str[i+1] == 'f'){
+            str.erase(i + 1, 1);
+            str[i] = '\f';
+        }
+        // if(str[i] == '\n'){
+        //     cout << "\\n found" << endl;
+        // }
+        // if(str[i] == '\r'){
+        //     cout << "\\r found" << endl;
+        // }
+        else if(str[i] == '\\' && str[i + 1] == '\n'){
+            str.erase(i , 2);
+            i--;
+        }
+    }
+    // cout << str << endl;
+    return str;
+}
+
 %}
 
 
@@ -73,6 +126,7 @@ comma (,)
 semicolon (;)
 identifier [A-Za-z_]+[A-Za-z0-9_]*
 keywords ((if)|(else)|(for)|(while)|(do)|(break)|(int)|(char)|(float)|(double)|(void)|(return)|(switch)|(case)|(default)|(continue))
+strings (\"[^"]*\")
 
 
 %%
@@ -171,6 +225,39 @@ keywords ((if)|(else)|(for)|(while)|(do)|(break)|(int)|(char)|(float)|(double)|(
 {identifier}        {
                         printToken("IDENTIFIER", yytext);
 }
+
+
+["]                 {
+                        BEGIN state_string;
+                        printf("starting string state\n");
+                        taking_string = "";
+}
+<state_string>["]   {
+                        BEGIN INITIAL;
+
+                    //    cout << yytext << endl;
+                        // printf("close string state\n");
+                        // cout <<"final "<< endl <<  taking_string << endl;
+                       printString("string", fixString(taking_string));
+}
+
+<state_string>\\\"    {
+                    //    printf("\nhandled\n");
+                       taking_string += yytext;
+}
+
+<state_string>(.|\n|\r) {
+                        // cout << "printing " << yytext << " " << (int)yytext[0] << endl;
+                        taking_string += yytext;
+}
+
+
+
+
+
+
+
+
 
 
 

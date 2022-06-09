@@ -3,6 +3,10 @@ int main(){
 	a=a+1;
 	char ch='a';
 	ch='\t';
-	char c[]="ab\td";
+	char c[]="a\'b\td\'";
+	"this\n is\
+	sdf";
+	"he said, \" I own a dog\"\
+	so i asked, \"what is his name?\"";
 	return 0;
 }	
