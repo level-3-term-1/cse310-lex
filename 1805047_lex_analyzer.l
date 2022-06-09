@@ -1,5 +1,7 @@
 %option noyywrap
 %x state_string
+%x state_single_line_comment
+%x state_multi_line_comment
 
 %{
 #include<stdio.h>
@@ -126,7 +128,7 @@ comma (,)
 semicolon (;)
 identifier [A-Za-z_]+[A-Za-z0-9_]*
 keywords ((if)|(else)|(for)|(while)|(do)|(break)|(int)|(char)|(float)|(double)|(void)|(return)|(switch)|(case)|(default)|(continue))
-strings (\"[^"]*\")
+
 
 
 %%
@@ -229,7 +231,7 @@ strings (\"[^"]*\")
 
 ["]                 {
                         BEGIN state_string;
-                        printf("starting string state\n");
+                        // printf("starting string state\n");
                         taking_string = "";
 }
 <state_string>["]   {
@@ -246,14 +248,17 @@ strings (\"[^"]*\")
                        taking_string += yytext;
 }
 
-<state_string>(.|\n|\r) {
+<state_string>(.|{special_character}) {
                         // cout << "printing " << yytext << " " << (int)yytext[0] << endl;
                         taking_string += yytext;
 }
 
 
 
-
+"//"                {
+                        BEGIN state_single_line_comment;
+                        printf("statring comment");
+}
 
 
 
