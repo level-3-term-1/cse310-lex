@@ -23,6 +23,10 @@ void printToken(string type, char id){
     cout << type << ", " << id << endl;
     // printf("%s, %s\n", type, id);
 }
+void printKeyword(string type, char* id){
+    cout << type << ", " << id << endl;
+    // printf("%s, %s\n", type, id);
+}
 
 char convertStringToChar(string str){
     if(str == "\\n") return '\n';
@@ -68,11 +72,17 @@ rthird []]
 comma (,)
 semicolon (;)
 identifier [A-Za-z_]+[A-Za-z0-9_]*
+keywords ((if)|(else)|(for)|(while)|(do)|(break)|(int)|(char)|(float)|(double)|(void)|(return)|(switch)|(case)|(default)|(continue))
 
 
 %%
 [\n]                {line_count ++;}
 {ws}                {}
+
+{keywords}          {
+                        printKeyword("keywords", yytext);
+}
+
 {digit}+            {
                         printToken("CONST_INT", yytext);
 
