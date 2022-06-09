@@ -56,6 +56,7 @@ char convertStringToChar(string str){
 }
 
 string fixString(string str){
+    cout << "before " << str << endl;
     for(int i = 0; i < str.size(); i++){
         if(str[i] == '\\' && str[i+1] == 't'){
             str.erase(i + 1, 1);
@@ -92,6 +93,9 @@ string fixString(string str){
         //     cout << "\\r found" << endl;
         // }
         else if(str[i] == '\\' && str[i + 1] == '\n'){
+            //new line
+            line_count ++;
+            // cout << line_count << endl;
             str.erase(i , 2);
             i--;
         }
@@ -128,6 +132,7 @@ comma (,)
 semicolon (;)
 identifier [A-Za-z_]+[A-Za-z0-9_]*
 keywords ((if)|(else)|(for)|(while)|(do)|(break)|(int)|(char)|(float)|(double)|(void)|(return)|(switch)|(case)|(default)|(continue))
+special_character_2 ((\n)|(\t)|(\\)|(\')|(\")|(\a)|(\f)|(\r)|(\b)|(\v)|(\0))
 
 
 
@@ -248,7 +253,7 @@ keywords ((if)|(else)|(for)|(while)|(do)|(break)|(int)|(char)|(float)|(double)|(
                        taking_string += yytext;
 }
 
-<state_string>(.|{special_character}) {
+<state_string>(.|{special_character_2}) {
                         // cout << "printing " << yytext << " " << (int)yytext[0] << endl;
                         taking_string += yytext;
 }
@@ -257,8 +262,35 @@ keywords ((if)|(else)|(for)|(while)|(do)|(break)|(int)|(char)|(float)|(double)|(
 
 "//"                {
                         BEGIN state_single_line_comment;
-                        printf("statring comment");
+                        printf("statring single line comment\n");
 }
+
+<state_single_line_comment>.*\\ {
+                        line_count++;
+                        // cout << line_count << endl;
+}
+
+<state_single_line_comment>.* {
+                        printf("ending comment\n");
+                        BEGIN INITIAL;
+}
+
+"/*"                {
+                        BEGIN state_multi_line_comment;
+                        printf("starting multiline comment\n");
+}
+
+<state_multi_line_comment>([*][/]) {
+    BEGIN INITIAL;
+                        printf("ending multiline\n");
+}
+<state_multi_line_comment>(.|{special_character_2}) {
+                        // cout << yytext << endl;
+                        if(yytext[0] == '\n') line_count ++;
+
+                        // printf("ending multiline \t %s", yytext);
+}
+
 
 
 
