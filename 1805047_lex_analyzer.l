@@ -2,6 +2,7 @@
 %x state_string
 %x state_single_line_comment
 %x state_multi_line_comment
+%x state_character
 
 %{
 #include<stdio.h>
@@ -31,11 +32,9 @@ void printString(string type, string str){
 
 void printToken(string type, char id){
     cout << type << ", " << id << endl;
-    // printf("%s, %s\n", type, id);
 }
 void printKeyword(string type, char* id){
     cout << type << ", " << id << endl;
-    // printf("%s, %s\n", type, id);
 }
 
 char convertStringToChar(string str){
@@ -86,15 +85,8 @@ string fixString(string str){
             str.erase(i + 1, 1);
             str[i] = '\f';
         }
-        // if(str[i] == '\n'){
-        //     cout << "\\n found" << endl;
-        // }
-        // if(str[i] == '\r'){
-        //     cout << "\\r found" << endl;
-        // }
         else if(str[i] == '\\' && str[i + 1] == '\n'){
             //new line
-            line_count ++;
             // cout << line_count << endl;
             str.erase(i , 2);
             i--;
@@ -112,7 +104,7 @@ ws {delim}+
 digit [0-9]
 letter [A-Za-z]
 special_character ((\\n)|(\\t)|(\\\\)|(\\\')|(\\\")|(\\a)|(\\f)|(\\r)|(\\b)|(\\v)|(\\0))
-float_number {digit}*(\.{digit}+)?(E[+-]?{digit}+)?
+float_number (({digit}*(\.{digit}+)?)|({digit}+))(E[+-]?{digit}+)?
 const_char ((\'([^\\]|{special_character})\'))
 
 addop [+-]
@@ -133,6 +125,15 @@ semicolon (;)
 identifier [A-Za-z_]+[A-Za-z0-9_]*
 keywords ((if)|(else)|(for)|(while)|(do)|(break)|(int)|(char)|(float)|(double)|(void)|(return)|(switch)|(case)|(default)|(continue))
 special_character_2 ((\n)|(\t)|(\\)|(\')|(\")|(\a)|(\f)|(\r)|(\b)|(\v)|(\0))
+special_character_3 ((\t)|(\\)|(\')|(\")|(\a)|(\f)|(\r)|(\b)|(\v)|(\0))
+
+decimal_point_error ({digit}*[.]{digit}*[.])
+ill_formed_number {digit}*([.]{digit}*)*([E]+[+-]*({digit}*)([.]{digit}*)*)*
+
+non_id {float_number}({digit}*[.]*)*{identifier}+
+multi_character_constant_error ((\'(([^\\\']|{special_character}){2,})\'))
+unfinished_character ((\'(([^\\\']|{special_character}){1,})))
+empty_character ['][']
 
 
 
@@ -253,10 +254,22 @@ special_character_2 ((\n)|(\t)|(\\)|(\')|(\")|(\a)|(\f)|(\r)|(\b)|(\v)|(\0))
                        taking_string += yytext;
 }
 
-<state_string>(.|{special_character_2}) {
+<state_string>\\\n    {
+                    //    printf("\nhandled\n");
+                       taking_string += yytext;
+                       line_count ++;
+}
+
+<state_string>(.|{special_character_3}) {
                         // cout << "printing " << yytext << " " << (int)yytext[0] << endl;
                         taking_string += yytext;
 }
+<state_string>\n  {
+                        cout << "unfinished_string" << endl;
+                        line_count ++;
+                        BEGIN INITIAL;
+}
+
 
 
 
@@ -270,7 +283,8 @@ special_character_2 ((\n)|(\t)|(\\)|(\')|(\")|(\a)|(\f)|(\r)|(\b)|(\v)|(\0))
                         // cout << line_count << endl;
 }
 
-<state_single_line_comment>.* {
+<state_single_line_comment>.*\n {
+                        line_count++;
                         printf("ending comment\n");
                         BEGIN INITIAL;
 }
@@ -290,15 +304,44 @@ special_character_2 ((\n)|(\t)|(\\)|(\')|(\")|(\a)|(\f)|(\r)|(\b)|(\v)|(\0))
 
                         // printf("ending multiline \t %s", yytext);
 }
+<state_multi_line_comment><<EOF>> {
+                        cout << "unfinished_comment" << endl;
+                        BEGIN INITIAL;
+}
 
+{decimal_point_error}({digit}*[.]*)* {
+                        cout << yytext << endl;
+                        cout << "decimal_point_error" << endl;
+}
 
+{ill_formed_number} {
+                        cout << yytext << endl;
+                        cout << "ill_formed_number" << endl;
+}
 
+{non_id}            {
+                        cout << yytext << endl;
+                        cout << "non id" << endl;
+}
 
+{multi_character_constant_error}  {
+                        cout << yytext << endl;
+                        cout << "multi_character_constant_error" << endl;
+}
 
+{unfinished_character}      {
+                        cout << yytext << endl;
+                        string str = yytext;
+                        for(int i = 0; i < str.size(); i++){
+                            if(str[i] == '\n') line_count ++;
+                        }
+                        cout << "unfinished_character" << endl;
+}
 
-
-
-
+{empty_character}       {
+                        cout << yytext << endl;
+                        cout << "empty_character" << endl;
+}
 
 
 

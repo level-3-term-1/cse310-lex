@@ -1,20 +1,29 @@
+"abcd12\
+
+\
+fsjdlkfj"
+4.3.5..3.3.3.3
+..
+5.
+4.3
+.3654
+1ee2
+''
+E12
+.3E12
+//1.4.1E-24.12.9\
+
+
+
+1E1.2
+1E32
+12acd
+abcd12
+sddfasdfb
+/*
+
+
 int main(){
 	int a,b;
 	a=a+1;
-	char ch='a';
-	ch='\t';
-	char c[]="a\'b\td\'";
-	"this\n is\
-	sdf";
-	"he said, \" I own a dog\"\
-	so i asked, \"what is his name?\"";
-	// a comment\
-	sdfs\lkklj\
-	dfgdf
-
-	/** another
-*** comment 
-sdfsdkljfl 
-***/
-	return 0;
-}	
+	char ch=
