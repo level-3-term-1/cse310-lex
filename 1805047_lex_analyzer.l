@@ -14,6 +14,7 @@
 using namespace std;
 
 int line_count=1;
+int start_point = 1;
 int error_count = 0;
 string taking_string = "";
 int bucket_size = 7;
@@ -101,7 +102,7 @@ void printID(string type, char* id){
 void printString(string type, string str){
     string actual_string = fixString(str);
     fprintf(tokenout, "<%s, %s>",type.c_str(), actual_string.c_str());
-    fprintf(logout, "\nLine no %d: Token <%s> Lexeme \"%s\" found --> <STRING, %s>\n", line_count, type.c_str(), str.c_str(), actual_string.c_str());
+    fprintf(logout, "\nLine no %d: Token <%s> Lexeme \"%s\" found --> <STRING, %s>\n", start_point, type.c_str(), str.c_str(), actual_string.c_str());
 }
 
 
@@ -143,7 +144,8 @@ void printErrorLog(string str){
 }
 
 void printCommentLog(){
-    fprintf(logout, "\nLine no %d: Token COMMENT Lexeme %s\n", line_count, taking_string.c_str());
+    // taking_string.erase(taking_string.size() - 1, 1);
+    fprintf(logout, "\nLine no %d: Token <COMMENT> Lexeme %s found\n", start_point, taking_string.c_str());
 }
 
 
@@ -294,6 +296,7 @@ empty_character ['][']
                         BEGIN state_string;
                         // printf("starting string state\n");
                         taking_string = "";
+                        start_point = line_count;
 }
 <state_string>["]   {
                         BEGIN INITIAL;
@@ -332,6 +335,7 @@ empty_character ['][']
 "//"                {
                         BEGIN state_single_line_comment;
                         taking_string = yytext;
+                        start_point = line_count;
                         // printf("statring single line comment\n");
 }
 
@@ -344,6 +348,7 @@ empty_character ['][']
 <state_single_line_comment>.*\n {
                         line_count++;
                         taking_string += yytext;
+                        taking_string.erase(taking_string.size() - 1, 1);
                         // printf("ending comment\n");
                         printCommentLog();
                         BEGIN INITIAL;
@@ -352,6 +357,7 @@ empty_character ['][']
 "/*"                {
                         BEGIN state_multi_line_comment;
                         taking_string = yytext;
+                        start_point = line_count;
                         // printf("starting multiline comment\n");
 }
 

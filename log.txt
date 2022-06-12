@@ -143,7 +143,7 @@ ScopeTable # 1
 
 Line no 7: Token <LPAREN> Lexeme ( found
 
-Line no 9: Token <STRING> Lexeme "abc\
+Line no 7: Token <STRING> Lexeme "abc\
 def\
 ghi" found --> <STRING, abcdefghi>
 
@@ -151,11 +151,10 @@ Line no 9: Token <RPAREN> Lexeme ) found
 
 Line no 9: Token <SEMICOLON> Lexeme ; found
 
-Line no 11: Token COMMENT Lexeme // a comment
+Line no 10: Token <COMMENT> Lexeme // a comment found
 
-
-Line no 12: Token COMMENT Lexeme /** another
-*** comment ***/
+Line no 11: Token <COMMENT> Lexeme /** another
+*** comment ***/ found
 
 Line no 13: Token <RETURN> Lexeme return found
 
