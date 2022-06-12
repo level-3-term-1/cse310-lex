@@ -1,6 +1,10 @@
 #include<bits/stdc++.h>
 using namespace std;
 
+
+FILE *logout;
+FILE *tokenout;
+
 class symbol_info
 {
 private:
@@ -33,7 +37,8 @@ public:
     void setKhali(bool khali_) { khali = khali_; }
 
     void print() {
-        cout << "< " << name << " : " << type << "> ";
+        fprintf(logout, " < %s : %s> ", name.c_str(), type.c_str());
+        // cout << "< " << name << " : " << type << "> ";
     }
     
 };

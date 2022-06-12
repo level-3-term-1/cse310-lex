@@ -21,7 +21,7 @@ public:
         if (parent != nullptr)
         {
             id = parent->id + "." + to_string(parent->count);
-            cout << "New ScopeTable with id " << id << " created" << endl;
+            // // cout << "New ScopeTable with id " << id << " created" << endl;
         }
         else
             id = "1";
@@ -36,12 +36,13 @@ public:
             // not found, now insert
             unsigned int idx = call_hash(key);
             int pos = this->arrayOfSymbolInfoList[idx].insert(key, value);
-            cout << "Inserted in ScopeTable# " << id << " at position " << idx << ", " << pos << endl;
+            // // cout << "Inserted in ScopeTable# " << id << " at position " << idx << ", " << pos << endl;
             return true;
         }
         else
         {
-            cout<< "<" << key << "," << value << "> already exists in current ScopeTable" << endl;
+            fprintf(logout, "\n%s already exists in current ScopeTable\n", key.c_str());
+            // cout<< "<" << key << "," << value << "> already exists in current ScopeTable" << endl;
         }
         return false;
     }
@@ -58,7 +59,7 @@ public:
         if (printResult && obj.second == nullptr)
         {
             string str = "Not found";
-            cout << str << endl;
+            // // cout << str << endl;
         }
         return obj;
     }
@@ -68,27 +69,31 @@ public:
         pair<int, symbol_info *> x = lookup(key, true);
         if (x.second == nullptr)
         {
-            cout << endl << key << " not found" << endl;
+            // // cout << endl << key << " not found" << endl;
             return false;
         }
 
         unsigned int hash_value = call_hash(key);
-        cout << "Found in ScopeTable# "<< id << " at position " << hash_value << ", " << x.first << endl << endl;
+        // // cout << "Found in ScopeTable# "<< id << " at position " << hash_value << ", " << x.first << endl << endl;
         if (this->arrayOfSymbolInfoList[hash_value].dlt(x.second))
         {
-            cout << "Deleted Entry " << hash_value << ", " << x.first << " from current ScopeTable" << endl;
+            // cout << "Deleted Entry " << hash_value << ", " << x.first << " from current ScopeTable" << endl;
         }
         return true;
     }
 
     void print()
     {
-        cout << endl << endl << "ScopeTable # " << id << endl;
+        fprintf(logout, "\nScopeTable # %s \n", id.c_str());
+        // cout << endl << "ScopeTable # " << id << endl;
         for (size_t i = 0; i < bucketSize; i++)
         {
-            cout << i << " -->  ";
+            if(this->arrayOfSymbolInfoList[i].isEmpty()) continue;
+            fprintf(logout, "%lu --> ", i);
+            // cout << i << " -->  ";
             this->arrayOfSymbolInfoList[i].print();
-            cout << endl;
+            fprintf(logout, "\n");
+            // cout << endl;
         }
         // cout << endl;
     }
@@ -107,8 +112,8 @@ public:
 
 scope_table::~scope_table()
 {
-    // cout << "calling the destructor of scope table" << endl;
-    // cout << "ScopeTable with id " << id << " removed" << endl;
+    // // cout << "calling the destructor of scope table" << endl;
+    // // cout << "ScopeTable with id " << id << " removed" << endl;
     delete[] arrayOfSymbolInfoList;
     if(flagForDeletingParentScope)
         delete parentScope;

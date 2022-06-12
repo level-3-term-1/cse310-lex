@@ -99,7 +99,7 @@ public:
         {
             temp->print();
             temp = temp->getNext();
-            cout << " ";
+            // cout << " ";
         }
         // temp = nullptr;
         // delete temp;

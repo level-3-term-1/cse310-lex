@@ -1,0 +1,22 @@
+{
+  "files.associations": {
+    "array": "c",
+    "bitset": "c",
+    "string_view": "c",
+    "initializer_list": "c",
+    "ranges": "c",
+    "span": "c",
+    "regex": "c",
+    "utility": "c",
+    "valarray": "c",
+    "ostream": "c",
+    "*.tcc": "c",
+    "optional": "c",
+    "ratio": "c",
+    "system_error": "c",
+    "functional": "c",
+    "tuple": "c",
+    "type_traits": "c",
+    "variant": "c"
+  }
+}

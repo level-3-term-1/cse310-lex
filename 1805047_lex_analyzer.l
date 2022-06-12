@@ -19,8 +19,6 @@ string taking_string = "";
 int bucket_size = 7;
 symbol_table symbolTable(bucket_size);
 
-FILE *logout;
-FILE *tokenout;
 
 string fixString(string str){
     // cout << "before " << str << endl;
@@ -68,12 +66,10 @@ void printOpAndPunc(string type, char* id){
     fprintf(tokenout, "<%s, %s>",type.c_str(), id);
     fprintf(logout, "\nLine no %d: Token <%s> Lexeme %s found\n", line_count, type.c_str(), id);
     string str(id);
-    cout << id[0] << endl;
-    if(id[0] == '{'){
-        cout << "here" << endl;
+    if(str == "{"){
         symbolTable.enterScope();
     }
-    else if(id[0] == '}'){
+    else if(str == "}"){
         symbolTable.exitScope();
     }
 }
@@ -81,31 +77,41 @@ void printOpAndPunc(string type, char* id){
 void printInt(string type, char* id){
     fprintf(tokenout, "<%s, %s>",type.c_str(), id);
     fprintf(logout, "\nLine no %d: Token <%s> Lexeme %s found\n", line_count, type.c_str(), id);
-    symbolTable.insert(id, type);
+    bool success = symbolTable.insert(id, type);
+    if(success)
+        symbolTable.printAllScopeTable();
 }
 
 void printFloat(string type, char* id){
     fprintf(tokenout, "<%s, %s>",type.c_str(), id);
     fprintf(logout, "\nLine no %d: Token <%s> Lexeme %s found\n", line_count, type.c_str(), id);
-    symbolTable.insert(id, type);
+    bool success = symbolTable.insert(id, type);
+    if(success)
+        symbolTable.printAllScopeTable();
 }
 
 void printID(string type, char* id){
     fprintf(tokenout, "<%s, %s>",type.c_str(), id);
     fprintf(logout, "\nLine no %d: Token <%s> Lexeme %s found\n", line_count, type.c_str(), id);
-    symbolTable.insert(id, type);
+    bool success = symbolTable.insert(id, type);
+    if(success)
+        symbolTable.printAllScopeTable();
 }
 
 void printString(string type, string str){
     string actual_string = fixString(str);
     fprintf(tokenout, "<%s, %s>",type.c_str(), actual_string.c_str());
-    fprintf(logout, "\nLine no %d: Token <%s> Lexeme %s found\n", line_count, type.c_str(), str.c_str());
+    fprintf(logout, "\nLine no %d: Token <%s> Lexeme \"%s\" found --> <STRING, %s>\n", line_count, type.c_str(), str.c_str(), actual_string.c_str());
 }
 
 
-void printChar(string type, char id){
+void printChar(string type, char id, string yytext){
     fprintf(tokenout, "<%s, %c>",type.c_str(), id);
-    fprintf(logout, "\nLine no %d: Token <%s> Lexeme %c found\n", line_count, type.c_str(), id);
+    fprintf(logout, "\nLine no %d: Token <%s> Lexeme %s found --> <CHAR_CONST, %c>\n", line_count, type.c_str(), yytext.c_str(), id );
+    string str(1, id);
+    bool success = symbolTable.insert(yytext, type);
+    if(success)
+        symbolTable.printAllScopeTable();
 }
 void printKeyword(string type, char* id){
     string up(id);
@@ -200,6 +206,7 @@ empty_character ['][']
 }
 {const_char}        {
                         char* str= yytext;
+                        string actual_string(yytext);
                         int len = strlen(yytext);
                         str[len - 1] = '\0';
                         str++;
@@ -207,7 +214,7 @@ empty_character ['][']
                         char a = str[0];
                         if(len>= 2) a = convertStringToChar(str);
                         if(!(len >= 2 && a == ' '))
-                            printChar("CONST_CHAR", a);
+                            printChar("CONST_CHAR", a, actual_string);
                         else {
                             printErrorLog("invalid character");
                         }
@@ -348,7 +355,7 @@ empty_character ['][']
                         // printf("starting multiline comment\n");
 }
 
-<state_multi_line_comment>([*][/]) {
+<state_multi_line_comment>"*/" {
                         BEGIN INITIAL;
                         taking_string += yytext;
                         printCommentLog();
@@ -435,6 +442,7 @@ int main(int argc,char *argv[]){
 
 	yyin= fin;
 	yylex();
+    symbolTable.printAllScopeTable();
     fprintf(logout, "Total lines: %d\n", line_count);
     fprintf(logout, "Total errors: %d\n", error_count);
 	fclose(yyin);
