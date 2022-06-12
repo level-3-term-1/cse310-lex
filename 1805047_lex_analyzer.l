@@ -64,7 +64,7 @@ string fixString(string str){
 }
 
 void printOpAndPunc(string type, char* id){
-    fprintf(tokenout, "<%s, %s>",type.c_str(), id);
+    fprintf(tokenout, "<%s, %s> ",type.c_str(), id);
     fprintf(logout, "\nLine no %d: Token <%s> Lexeme %s found\n", line_count, type.c_str(), id);
     string str(id);
     if(str == "{"){
@@ -76,7 +76,7 @@ void printOpAndPunc(string type, char* id){
 }
 
 void printInt(string type, char* id){
-    fprintf(tokenout, "<%s, %s>",type.c_str(), id);
+    fprintf(tokenout, "<%s, %s> ",type.c_str(), id);
     fprintf(logout, "\nLine no %d: Token <%s> Lexeme %s found\n", line_count, type.c_str(), id);
     bool success = symbolTable.insert(id, type);
     if(success)
@@ -84,7 +84,7 @@ void printInt(string type, char* id){
 }
 
 void printFloat(string type, char* id){
-    fprintf(tokenout, "<%s, %s>",type.c_str(), id);
+    fprintf(tokenout, "<%s, %s> ",type.c_str(), id);
     fprintf(logout, "\nLine no %d: Token <%s> Lexeme %s found\n", line_count, type.c_str(), id);
     bool success = symbolTable.insert(id, type);
     if(success)
@@ -92,7 +92,7 @@ void printFloat(string type, char* id){
 }
 
 void printID(string type, char* id){
-    fprintf(tokenout, "<%s, %s>",type.c_str(), id);
+    fprintf(tokenout, "<%s, %s> ",type.c_str(), id);
     fprintf(logout, "\nLine no %d: Token <%s> Lexeme %s found\n", line_count, type.c_str(), id);
     bool success = symbolTable.insert(id, type);
     if(success)
@@ -101,13 +101,13 @@ void printID(string type, char* id){
 
 void printString(string type, string str){
     string actual_string = fixString(str);
-    fprintf(tokenout, "<%s, %s>",type.c_str(), actual_string.c_str());
+    fprintf(tokenout, "<%s, %s> ",type.c_str(), actual_string.c_str());
     fprintf(logout, "\nLine no %d: Token <%s> Lexeme \"%s\" found --> <STRING, %s>\n", start_point, type.c_str(), str.c_str(), actual_string.c_str());
 }
 
 
 void printChar(string type, char id, string yytext){
-    fprintf(tokenout, "<%s, %c>",type.c_str(), id);
+    fprintf(tokenout, "<%s, %c> ",type.c_str(), id);
     fprintf(logout, "\nLine no %d: Token <%s> Lexeme %s found --> <CHAR_CONST, %c>\n", line_count, type.c_str(), yytext.c_str(), id );
     string str(1, id);
     bool success = symbolTable.insert(yytext, type);
@@ -117,7 +117,7 @@ void printChar(string type, char id, string yytext){
 void printKeyword(string type, char* id){
     string up(id);
     transform(up.begin(), up.end(), up.begin(), ::toupper);
-    fprintf(tokenout, "<%s>", up.c_str());
+    fprintf(tokenout, "<%s> ", up.c_str());
     fprintf(logout, "\nLine no %d: Token <%s> Lexeme %s found\n", line_count, up.c_str(), id);
 }
 
@@ -138,8 +138,9 @@ char convertStringToChar(string str){
     return ' ';
 }
 
-void printErrorLog(string str){
-    fprintf(logout, "\nError at Line no %d: %s\n", line_count, str.c_str());
+void printErrorLog(string str, int error_line = line_count, string error = yytext){
+    // cout << "here " <<  error  << " oka ";
+    fprintf(logout, "\nError at line no %d: %s %s\n", error_line, str.c_str(), error.c_str());
     error_count++;
 }
 
@@ -157,8 +158,9 @@ ws {delim}+
 digit [0-9]
 letter [A-Za-z]
 special_character ((\\n)|(\\t)|(\\\\)|(\\\')|(\\\")|(\\a)|(\\f)|(\\r)|(\\b)|(\\v)|(\\0))
+special_character_without_newline ((\\t)|(\\\\)|(\\\')|(\\\")|(\\a)|(\\f)|(\\r)|(\\b)|(\\v)|(\\0))
 float_number (({digit}*(\.{digit}+)?)|({digit}+))(E[+-]?{digit}+)?
-const_char ((\'([^\\]|{special_character})\'))
+const_char ((\'([^\\\'(\n)]|{special_character})\'))
 
 addop [+-]
 mulop [*/%]
@@ -184,8 +186,8 @@ decimal_point_error ({digit}*[.]{digit}*[.])
 ill_formed_number {digit}*([.]{digit}*)*([E]+[+-]*({digit}*)([.]{digit}*)*)*
 
 non_id {float_number}({digit}*[.]*)*{identifier}+
-multi_character_constant_error ((\'(([^\\\']|{special_character}){2,})\'))
-unfinished_character ((\'(([^\\\']|{special_character}){1,})))
+multi_character_constant_error ((\'(([^\\\'(\n)]|.){2,})\'))
+unfinished_character ((\'([^\\\'(\n)]|{special_character_without_newline})*[(\n)]))
 empty_character ['][']
 
 
@@ -323,8 +325,9 @@ empty_character ['][']
                         taking_string += yytext;
 }
 <state_string>\n  {
-                        // cout << "unfinished_string" << endl;
-                        printErrorLog("unfinished string");
+                        // cout << "unfinished_string " << yytext << endl;
+                        taking_string = "\"" + taking_string;
+                        printErrorLog("Unterminated String", start_point, taking_string);
                         line_count ++;
                         BEGIN INITIAL;
 }
@@ -339,9 +342,10 @@ empty_character ['][']
                         // printf("statring single line comment\n");
 }
 
-<state_single_line_comment>.*\\ {
+<state_single_line_comment>.*[\\][\n] {
                         line_count++;
                         taking_string += yytext;
+                        // cout << "here " << yytext << endl;  
                         // cout << line_count << endl;
 }
 
@@ -375,54 +379,60 @@ empty_character ['][']
                         // printf("ending multiline \t %s", yytext);
 }
 <state_multi_line_comment><<EOF>> {
-                        printErrorLog("unfinished comment");
+                        printErrorLog("Unterminated Comment", start_point, taking_string);
                         // cout << "unfinished_comment" << endl;
                         BEGIN INITIAL;
 }
 
 {decimal_point_error}({digit}*[.]*)* {
                         // cout << yytext << endl;
-                        // cout << "decimal_point_error" << endl;
-                        printErrorLog("decimal point error");
+                        // cout << "Too many decimal points" << endl;
+                        printErrorLog("Too many decimal points");
 }
 
 {ill_formed_number} {
                         // cout << yytext << endl;
-                        // cout << "ill_formed_number" << endl;
-                        printErrorLog("ill formed number");
+                        // cout << "Ill formed number" << endl;
+                        printErrorLog("Ill formed number");
 }
 
 {non_id}            {
                         // cout << yytext << endl;
-                        // cout << "non id" << endl;
-                        printErrorLog("invalid identifier");
+                        // cout << "Invalid prefix on ID or invalid suffix on Number" << endl;
+                        printErrorLog("Invalid prefix on ID or invalid suffix on Number");
 }
+
 
 {multi_character_constant_error}  {
                         // cout << yytext << endl;
-                        // cout << "multi_character_constant_error" << endl;
-                        printErrorLog("multi character constant error");
+                        // cout << "Multi character constant error" << endl;
+                        printErrorLog("Multi character constant error");
 }
 
 {unfinished_character}      {
-                        // cout << yytext << endl;
                         string str = yytext;
-                        for(int i = 0; i < str.size(); i++){
-                            if(str[i] == '\n') line_count ++;
-                        }
-                        printErrorLog("unfinished character");
-                        // cout << "unfinished_character" << endl;
+                        // cout << line_count << " ";
+                        unput(yytext[str.size() - 1]);
+                        str.erase(str.size() - 1, 1);
+                        yytext = (char *) str.c_str();
+                        printErrorLog("Unterminated character");
+                        // cout << yytext << endl;
+                        // for(int i = 0; i < str.size(); i++){
+                        //     if(str[i] == '\n') line_count ++;
+                        // }
+                        
+                        // cout << line_count << endl;
 }
 
 {empty_character}       {
                         // cout << yytext << endl;
                         // cout << "empty_character" << endl;
-                        printErrorLog("empty character");
+                        printErrorLog("Empty character constant error");
 }
 
 .                       {
                             // cout<< "unrecognized_character" << endl;
-                            printErrorLog("unrecognized character");
+                            printErrorLog("Unrecognized character");
 }
 
 
@@ -443,8 +453,8 @@ int main(int argc,char *argv[]){
 		return 0;
 	}
 	
-	logout= fopen("log.txt","w");
-	tokenout= fopen("token.txt","w");
+	logout= fopen("1805047_log.txt","w");
+	tokenout= fopen("1805047_token.txt","w");
 
 	yyin= fin;
 	yylex();
