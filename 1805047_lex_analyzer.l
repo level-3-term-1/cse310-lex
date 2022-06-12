@@ -6,8 +6,9 @@
 
 %{
 #include<stdio.h>
-
+#include "1805047_symbol_table.h"
 #include<iostream>
+#include<algorithm>
 #include<stdlib.h>
 #include<string>
 using namespace std;
@@ -18,47 +19,12 @@ string taking_string = "";
 FILE *logout;
 FILE *tokenout;
 
-void printToken(string type, char* id){
-    cout << type << ", " << id << endl;
-    // printf("%s, %s\n", type, id);
-}
-
-
-void printString(string type, string str){
-    cout << type << ", " << str << endl;
-    // printf("%s, %s\n", type, id);
-}
-
-
-void printToken(string type, char id){
-    cout << type << ", " << id << endl;
-}
-void printKeyword(string type, char* id){
-    cout << type << ", " << id << endl;
-}
-
-char convertStringToChar(string str){
-    if(str == "\\n") return '\n';
-    if(str == "\\t") return '\t';
-    if(str == "\\\\") return '\\';
-    if(str == "\\\'") return '\'';
-    if(str == "\\\"") return '\"';
-    if(str == "\\a") return '\a';
-    if(str == "\\f") return '\f';
-    if(str == "\\r") return '\r';
-    if(str == "\\b") return '\b';
-    if(str == "\\v") return '\v';
-    if(str == "\\0") return '\0';
-    
-    //error
-    return ' ';
-}
-
 string fixString(string str){
-    cout << "before " << str << endl;
+    // cout << "before " << str << endl;
     for(int i = 0; i < str.size(); i++){
         if(str[i] == '\\' && str[i+1] == 't'){
             str.erase(i + 1, 1);
+            // cout << "tab" << endl;
             str[i] = '\t';
         }
         else if(str[i] == '\\' && str[i+1] == 'n'){
@@ -92,9 +58,58 @@ string fixString(string str){
             i--;
         }
     }
-    // cout << str << endl;
     return str;
 }
+
+void printToken(string type, char* id){
+    fprintf(tokenout, "<%s, %s>",type.c_str(), id);
+    fprintf(logout, "Line no %d: Token <%s> Lexeme %s found\n", line_count, type.c_str(), id);
+}
+
+
+void printString(string type, string str){
+    string actual_string = fixString(str);
+    fprintf(tokenout, "<%s, %s>",type.c_str(), actual_string.c_str());
+    fprintf(logout, "Line no %d: Token <%s> Lexeme %s found\n", line_count, type.c_str(), str.c_str());
+}
+
+
+void printChar(string type, char id){
+    fprintf(tokenout, "<%s, %c>",type.c_str(), id);
+    fprintf(logout, "Line no %d: Token <%s> Lexeme %c found\n", line_count, type.c_str(), id);
+}
+void printKeyword(string type, char* id){
+    string up(id);
+    transform(up.begin(), up.end(), up.begin(), ::toupper);
+    fprintf(tokenout, "<%s>", up.c_str());
+    fprintf(logout, "Line no %d: Token <%s> Lexeme %s found\n", line_count, up.c_str(), id);
+}
+
+char convertStringToChar(string str){
+    if(str == "\\n") return '\n';
+    if(str == "\\t") return '\t';
+    if(str == "\\\\") return '\\';
+    if(str == "\\\'") return '\'';
+    if(str == "\\\"") return '\"';
+    if(str == "\\a") return '\a';
+    if(str == "\\f") return '\f';
+    if(str == "\\r") return '\r';
+    if(str == "\\b") return '\b';
+    if(str == "\\v") return '\v';
+    if(str == "\\0") return '\0';
+    
+    //error
+    return ' ';
+}
+
+void printErrorLog(string str){
+    fprintf(logout, "Error at Line no %d: %s\n", line_count, str.c_str());
+}
+
+void printCommentLog(){
+    fprintf(logout, "Line no %d: Token COMMENT Lexeme %s\n", line_count, taking_string.c_str());
+}
+
 
 %}
 
@@ -155,14 +170,17 @@ empty_character ['][']
 }
 {const_char}        {
                         char* str= yytext;
-                        // cout << yytext << endl;
                         int len = strlen(yytext);
                         str[len - 1] = '\0';
                         str++;
                         len = strlen(str);
                         char a = str[0];
                         if(len>= 2) a = convertStringToChar(str);
-                        printToken("CONST_CHAR", a);
+                        if(!(len >= 2 && a == ' '))
+                            printChar("CONST_CHAR", a);
+                        else {
+                            printErrorLog("invalid character");
+                        }
 }
 
 
@@ -231,7 +249,7 @@ empty_character ['][']
 }
 
 {identifier}        {
-                        printToken("IDENTIFIER", yytext);
+                        printToken("ID", yytext);
 }
 
 
@@ -246,7 +264,7 @@ empty_character ['][']
                     //    cout << yytext << endl;
                         // printf("close string state\n");
                         // cout <<"final "<< endl <<  taking_string << endl;
-                       printString("string", fixString(taking_string));
+                       printString("STRING", taking_string);
 }
 
 <state_string>\\\"    {
@@ -265,7 +283,8 @@ empty_character ['][']
                         taking_string += yytext;
 }
 <state_string>\n  {
-                        cout << "unfinished_string" << endl;
+                        // cout << "unfinished_string" << endl;
+                        printErrorLog("unfinished string");
                         line_count ++;
                         BEGIN INITIAL;
 }
@@ -275,74 +294,93 @@ empty_character ['][']
 
 "//"                {
                         BEGIN state_single_line_comment;
-                        printf("statring single line comment\n");
+                        taking_string = yytext;
+                        // printf("statring single line comment\n");
 }
 
 <state_single_line_comment>.*\\ {
                         line_count++;
+                        taking_string += yytext;
                         // cout << line_count << endl;
 }
 
 <state_single_line_comment>.*\n {
                         line_count++;
-                        printf("ending comment\n");
+                        taking_string += yytext;
+                        // printf("ending comment\n");
+                        printCommentLog();
                         BEGIN INITIAL;
 }
 
 "/*"                {
                         BEGIN state_multi_line_comment;
-                        printf("starting multiline comment\n");
+                        taking_string = yytext;
+                        // printf("starting multiline comment\n");
 }
 
 <state_multi_line_comment>([*][/]) {
-    BEGIN INITIAL;
-                        printf("ending multiline\n");
+                        BEGIN INITIAL;
+                        taking_string += yytext;
+                        printCommentLog();
+                        // printf("ending multiline\n");
 }
 <state_multi_line_comment>(.|{special_character_2}) {
                         // cout << yytext << endl;
+                        taking_string += yytext;
                         if(yytext[0] == '\n') line_count ++;
 
                         // printf("ending multiline \t %s", yytext);
 }
 <state_multi_line_comment><<EOF>> {
-                        cout << "unfinished_comment" << endl;
+                        printErrorLog("unfinished comment");
+                        // cout << "unfinished_comment" << endl;
                         BEGIN INITIAL;
 }
 
 {decimal_point_error}({digit}*[.]*)* {
-                        cout << yytext << endl;
-                        cout << "decimal_point_error" << endl;
+                        // cout << yytext << endl;
+                        // cout << "decimal_point_error" << endl;
+                        printErrorLog("decimal point error");
 }
 
 {ill_formed_number} {
-                        cout << yytext << endl;
-                        cout << "ill_formed_number" << endl;
+                        // cout << yytext << endl;
+                        // cout << "ill_formed_number" << endl;
+                        printErrorLog("ill formed number");
 }
 
 {non_id}            {
-                        cout << yytext << endl;
-                        cout << "non id" << endl;
+                        // cout << yytext << endl;
+                        // cout << "non id" << endl;
+                        printErrorLog("invalid identifier");
 }
 
 {multi_character_constant_error}  {
-                        cout << yytext << endl;
-                        cout << "multi_character_constant_error" << endl;
+                        // cout << yytext << endl;
+                        // cout << "multi_character_constant_error" << endl;
+                        printErrorLog("multi character constant error");
 }
 
 {unfinished_character}      {
-                        cout << yytext << endl;
+                        // cout << yytext << endl;
                         string str = yytext;
                         for(int i = 0; i < str.size(); i++){
                             if(str[i] == '\n') line_count ++;
                         }
-                        cout << "unfinished_character" << endl;
+                        printErrorLog("unfinished character");
+                        // cout << "unfinished_character" << endl;
 }
 
 {empty_character}       {
-                        cout << yytext << endl;
-                        cout << "empty_character" << endl;
+                        // cout << yytext << endl;
+                        // cout << "empty_character" << endl;
+                        printErrorLog("empty character");
 }
 
+.                       {
+                            // cout<< "unrecognized_character" << endl;
+                            printErrorLog("unrecognized character");
+}
 
 
 %%
