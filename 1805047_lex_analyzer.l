@@ -16,6 +16,8 @@ using namespace std;
 int line_count=1;
 int error_count = 0;
 string taking_string = "";
+int bucket_size = 7;
+symbol_table symbolTable(bucket_size);
 
 FILE *logout;
 FILE *tokenout;
@@ -62,28 +64,54 @@ string fixString(string str){
     return str;
 }
 
-void printToken(string type, char* id){
+void printOpAndPunc(string type, char* id){
     fprintf(tokenout, "<%s, %s>",type.c_str(), id);
-    fprintf(logout, "Line no %d: Token <%s> Lexeme %s found\n", line_count, type.c_str(), id);
+    fprintf(logout, "\nLine no %d: Token <%s> Lexeme %s found\n", line_count, type.c_str(), id);
+    string str(id);
+    cout << id[0] << endl;
+    if(id[0] == '{'){
+        cout << "here" << endl;
+        symbolTable.enterScope();
+    }
+    else if(id[0] == '}'){
+        symbolTable.exitScope();
+    }
 }
 
+void printInt(string type, char* id){
+    fprintf(tokenout, "<%s, %s>",type.c_str(), id);
+    fprintf(logout, "\nLine no %d: Token <%s> Lexeme %s found\n", line_count, type.c_str(), id);
+    symbolTable.insert(id, type);
+}
+
+void printFloat(string type, char* id){
+    fprintf(tokenout, "<%s, %s>",type.c_str(), id);
+    fprintf(logout, "\nLine no %d: Token <%s> Lexeme %s found\n", line_count, type.c_str(), id);
+    symbolTable.insert(id, type);
+}
+
+void printID(string type, char* id){
+    fprintf(tokenout, "<%s, %s>",type.c_str(), id);
+    fprintf(logout, "\nLine no %d: Token <%s> Lexeme %s found\n", line_count, type.c_str(), id);
+    symbolTable.insert(id, type);
+}
 
 void printString(string type, string str){
     string actual_string = fixString(str);
     fprintf(tokenout, "<%s, %s>",type.c_str(), actual_string.c_str());
-    fprintf(logout, "Line no %d: Token <%s> Lexeme %s found\n", line_count, type.c_str(), str.c_str());
+    fprintf(logout, "\nLine no %d: Token <%s> Lexeme %s found\n", line_count, type.c_str(), str.c_str());
 }
 
 
 void printChar(string type, char id){
     fprintf(tokenout, "<%s, %c>",type.c_str(), id);
-    fprintf(logout, "Line no %d: Token <%s> Lexeme %c found\n", line_count, type.c_str(), id);
+    fprintf(logout, "\nLine no %d: Token <%s> Lexeme %c found\n", line_count, type.c_str(), id);
 }
 void printKeyword(string type, char* id){
     string up(id);
     transform(up.begin(), up.end(), up.begin(), ::toupper);
     fprintf(tokenout, "<%s>", up.c_str());
-    fprintf(logout, "Line no %d: Token <%s> Lexeme %s found\n", line_count, up.c_str(), id);
+    fprintf(logout, "\nLine no %d: Token <%s> Lexeme %s found\n", line_count, up.c_str(), id);
 }
 
 char convertStringToChar(string str){
@@ -104,12 +132,12 @@ char convertStringToChar(string str){
 }
 
 void printErrorLog(string str){
-    fprintf(logout, "Error at Line no %d: %s\n", line_count, str.c_str());
+    fprintf(logout, "\nError at Line no %d: %s\n", line_count, str.c_str());
     error_count++;
 }
 
 void printCommentLog(){
-    fprintf(logout, "Line no %d: Token COMMENT Lexeme %s\n", line_count, taking_string.c_str());
+    fprintf(logout, "\nLine no %d: Token COMMENT Lexeme %s\n", line_count, taking_string.c_str());
 }
 
 
@@ -163,12 +191,12 @@ empty_character ['][']
 }
 
 {digit}+            {
-                        printToken("CONST_INT", yytext);
+                        printInt("CONST_INT", yytext);
 
                     }
 
 {float_number}      {
-                        printToken("CONST_FLOAT", yytext);
+                        printFloat("CONST_FLOAT", yytext);
 }
 {const_char}        {
                         char* str= yytext;
@@ -187,71 +215,71 @@ empty_character ['][']
 
 
 {addop}             {
-                        printToken("ADDOP", yytext);
+                        printOpAndPunc("ADDOP", yytext);
 }
 
 {incop}          {
-                        printToken("INCOP", yytext);
+                        printOpAndPunc("INCOP", yytext);
 }
 {mulop}            {
-                        printToken("MULOP", yytext);
+                        printOpAndPunc("MULOP", yytext);
 }    
 
 
 {relop}             {
-                        printToken("RELOP", yytext);
+                        printOpAndPunc("RELOP", yytext);
 }
 
 {assignop}             {
-                        printToken("ASSIGNOP", yytext);
+                        printOpAndPunc("ASSIGNOP", yytext);
 }
 
 
 {logicop}             {
-                        printToken("LOGICOP", yytext);
+                        printOpAndPunc("LOGICOP", yytext);
 }
 
 
 {not}             {
-                        printToken("NOT", yytext);
+                        printOpAndPunc("NOT", yytext);
 }
 
 
 {lparen}             {
-                        printToken("LPAREN", yytext);
+                        printOpAndPunc("LPAREN", yytext);
 }
 
 {rparen}             {
-                        printToken("RPAREN", yytext);
+                        printOpAndPunc("RPAREN", yytext);
 }
 
 
 {lcurl}             {
-                        printToken("LCURL", yytext);
+                        printOpAndPunc("LCURL", yytext);
 }
 
 {rcurl}             {
-                        printToken("RCURL", yytext);
+                        printOpAndPunc("RCURL", yytext);
 }
 
 
 {lthird}            {
-                        printToken("LTHIRD", yytext);
+                        printOpAndPunc("LTHIRD", yytext);
 }
 
 {rthird}            {
-                        printToken("RTHIRD", yytext);
+                        printOpAndPunc("RTHIRD", yytext);
 }
 
 {comma}             {
-                        printToken("COMMA", yytext);
+                        printOpAndPunc("COMMA", yytext);
 }
 {semicolon}         {
-                        printToken("SEMICOLON", yytext);
+                        printOpAndPunc("SEMICOLON", yytext);
 }
 
 {identifier}        {
-                        printToken("ID", yytext);
+                        printID("ID", yytext);
 }
 
 

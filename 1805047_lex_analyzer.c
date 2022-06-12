@@ -648,6 +648,8 @@ using namespace std;
 int line_count=1;
 int error_count = 0;
 string taking_string = "";
+int bucket_size = 7;
+symbol_table symbolTable(bucket_size);
 
 FILE *logout;
 FILE *tokenout;
@@ -694,28 +696,54 @@ string fixString(string str){
     return str;
 }
 
-void printToken(string type, char* id){
+void printOpAndPunc(string type, char* id){
     fprintf(tokenout, "<%s, %s>",type.c_str(), id);
-    fprintf(logout, "Line no %d: Token <%s> Lexeme %s found\n", line_count, type.c_str(), id);
+    fprintf(logout, "\nLine no %d: Token <%s> Lexeme %s found\n", line_count, type.c_str(), id);
+    string str(id);
+    cout << id[0] << endl;
+    if(id[0] == '{'){
+        cout << "here" << endl;
+        symbolTable.enterScope();
+    }
+    else if(id[0] == '}'){
+        symbolTable.exitScope();
+    }
 }
 
+void printInt(string type, char* id){
+    fprintf(tokenout, "<%s, %s>",type.c_str(), id);
+    fprintf(logout, "\nLine no %d: Token <%s> Lexeme %s found\n", line_count, type.c_str(), id);
+    symbolTable.insert(id, type);
+}
+
+void printFloat(string type, char* id){
+    fprintf(tokenout, "<%s, %s>",type.c_str(), id);
+    fprintf(logout, "\nLine no %d: Token <%s> Lexeme %s found\n", line_count, type.c_str(), id);
+    symbolTable.insert(id, type);
+}
+
+void printID(string type, char* id){
+    fprintf(tokenout, "<%s, %s>",type.c_str(), id);
+    fprintf(logout, "\nLine no %d: Token <%s> Lexeme %s found\n", line_count, type.c_str(), id);
+    symbolTable.insert(id, type);
+}
 
 void printString(string type, string str){
     string actual_string = fixString(str);
     fprintf(tokenout, "<%s, %s>",type.c_str(), actual_string.c_str());
-    fprintf(logout, "Line no %d: Token <%s> Lexeme %s found\n", line_count, type.c_str(), str.c_str());
+    fprintf(logout, "\nLine no %d: Token <%s> Lexeme %s found\n", line_count, type.c_str(), str.c_str());
 }
 
 
 void printChar(string type, char id){
     fprintf(tokenout, "<%s, %c>",type.c_str(), id);
-    fprintf(logout, "Line no %d: Token <%s> Lexeme %c found\n", line_count, type.c_str(), id);
+    fprintf(logout, "\nLine no %d: Token <%s> Lexeme %c found\n", line_count, type.c_str(), id);
 }
 void printKeyword(string type, char* id){
     string up(id);
     transform(up.begin(), up.end(), up.begin(), ::toupper);
     fprintf(tokenout, "<%s>", up.c_str());
-    fprintf(logout, "Line no %d: Token <%s> Lexeme %s found\n", line_count, up.c_str(), id);
+    fprintf(logout, "\nLine no %d: Token <%s> Lexeme %s found\n", line_count, up.c_str(), id);
 }
 
 char convertStringToChar(string str){
@@ -736,17 +764,17 @@ char convertStringToChar(string str){
 }
 
 void printErrorLog(string str){
-    fprintf(logout, "Error at Line no %d: %s\n", line_count, str.c_str());
+    fprintf(logout, "\nError at Line no %d: %s\n", line_count, str.c_str());
     error_count++;
 }
 
 void printCommentLog(){
-    fprintf(logout, "Line no %d: Token COMMENT Lexeme %s\n", line_count, taking_string.c_str());
+    fprintf(logout, "\nLine no %d: Token COMMENT Lexeme %s\n", line_count, taking_string.c_str());
 }
 
 
-#line 749 "1805047_lex_analyzer.c"
-#line 750 "1805047_lex_analyzer.c"
+#line 777 "1805047_lex_analyzer.c"
+#line 778 "1805047_lex_analyzer.c"
 
 #define INITIAL 0
 #define state_string 1
@@ -967,9 +995,9 @@ YY_DECL
 		}
 
 	{
-#line 157 "1805047_lex_analyzer.l"
+#line 185 "1805047_lex_analyzer.l"
 
-#line 973 "1805047_lex_analyzer.c"
+#line 1001 "1805047_lex_analyzer.c"
 
 	while ( /*CONSTCOND*/1 )		/* loops until end-of-file is reached */
 		{
@@ -1029,40 +1057,40 @@ do_action:	/* This label is used only to access EOF actions. */
 case 1:
 /* rule 1 can match eol */
 YY_RULE_SETUP
-#line 158 "1805047_lex_analyzer.l"
+#line 186 "1805047_lex_analyzer.l"
 {line_count ++;}
 	YY_BREAK
 case 2:
 YY_RULE_SETUP
-#line 159 "1805047_lex_analyzer.l"
+#line 187 "1805047_lex_analyzer.l"
 {}
 	YY_BREAK
 case 3:
 YY_RULE_SETUP
-#line 161 "1805047_lex_analyzer.l"
+#line 189 "1805047_lex_analyzer.l"
 {
                         printKeyword("keywords", yytext);
 }
 	YY_BREAK
 case 4:
 YY_RULE_SETUP
-#line 165 "1805047_lex_analyzer.l"
+#line 193 "1805047_lex_analyzer.l"
 {
-                        printToken("CONST_INT", yytext);
+                        printInt("CONST_INT", yytext);
 
                     }
 	YY_BREAK
 case 5:
 YY_RULE_SETUP
-#line 170 "1805047_lex_analyzer.l"
+#line 198 "1805047_lex_analyzer.l"
 {
-                        printToken("CONST_FLOAT", yytext);
+                        printFloat("CONST_FLOAT", yytext);
 }
 	YY_BREAK
 case 6:
 /* rule 6 can match eol */
 YY_RULE_SETUP
-#line 173 "1805047_lex_analyzer.l"
+#line 201 "1805047_lex_analyzer.l"
 {
                         char* str= yytext;
                         int len = strlen(yytext);
@@ -1080,119 +1108,119 @@ YY_RULE_SETUP
 	YY_BREAK
 case 7:
 YY_RULE_SETUP
-#line 189 "1805047_lex_analyzer.l"
+#line 217 "1805047_lex_analyzer.l"
 {
-                        printToken("ADDOP", yytext);
+                        printOpAndPunc("ADDOP", yytext);
 }
 	YY_BREAK
 case 8:
 YY_RULE_SETUP
-#line 193 "1805047_lex_analyzer.l"
+#line 221 "1805047_lex_analyzer.l"
 {
-                        printToken("INCOP", yytext);
+                        printOpAndPunc("INCOP", yytext);
 }
 	YY_BREAK
 case 9:
 YY_RULE_SETUP
-#line 196 "1805047_lex_analyzer.l"
+#line 224 "1805047_lex_analyzer.l"
 {
-                        printToken("MULOP", yytext);
+                        printOpAndPunc("MULOP", yytext);
 }    
 	YY_BREAK
 case 10:
 YY_RULE_SETUP
-#line 201 "1805047_lex_analyzer.l"
+#line 229 "1805047_lex_analyzer.l"
 {
-                        printToken("RELOP", yytext);
+                        printOpAndPunc("RELOP", yytext);
 }
 	YY_BREAK
 case 11:
 YY_RULE_SETUP
-#line 205 "1805047_lex_analyzer.l"
+#line 233 "1805047_lex_analyzer.l"
 {
-                        printToken("ASSIGNOP", yytext);
+                        printOpAndPunc("ASSIGNOP", yytext);
 }
 	YY_BREAK
 case 12:
 YY_RULE_SETUP
-#line 210 "1805047_lex_analyzer.l"
+#line 238 "1805047_lex_analyzer.l"
 {
-                        printToken("LOGICOP", yytext);
+                        printOpAndPunc("LOGICOP", yytext);
 }
 	YY_BREAK
 case 13:
 YY_RULE_SETUP
-#line 215 "1805047_lex_analyzer.l"
+#line 243 "1805047_lex_analyzer.l"
 {
-                        printToken("NOT", yytext);
+                        printOpAndPunc("NOT", yytext);
 }
 	YY_BREAK
 case 14:
 YY_RULE_SETUP
-#line 220 "1805047_lex_analyzer.l"
+#line 248 "1805047_lex_analyzer.l"
 {
-                        printToken("LPAREN", yytext);
+                        printOpAndPunc("LPAREN", yytext);
 }
 	YY_BREAK
 case 15:
 YY_RULE_SETUP
-#line 224 "1805047_lex_analyzer.l"
+#line 252 "1805047_lex_analyzer.l"
 {
-                        printToken("RPAREN", yytext);
+                        printOpAndPunc("RPAREN", yytext);
 }
 	YY_BREAK
 case 16:
 YY_RULE_SETUP
-#line 229 "1805047_lex_analyzer.l"
+#line 257 "1805047_lex_analyzer.l"
 {
-                        printToken("LCURL", yytext);
+                        printOpAndPunc("LCURL", yytext);
 }
 	YY_BREAK
 case 17:
 YY_RULE_SETUP
-#line 233 "1805047_lex_analyzer.l"
+#line 261 "1805047_lex_analyzer.l"
 {
-                        printToken("RCURL", yytext);
+                        printOpAndPunc("RCURL", yytext);
 }
 	YY_BREAK
 case 18:
 YY_RULE_SETUP
-#line 238 "1805047_lex_analyzer.l"
+#line 266 "1805047_lex_analyzer.l"
 {
-                        printToken("LTHIRD", yytext);
+                        printOpAndPunc("LTHIRD", yytext);
 }
 	YY_BREAK
 case 19:
 YY_RULE_SETUP
-#line 242 "1805047_lex_analyzer.l"
+#line 270 "1805047_lex_analyzer.l"
 {
-                        printToken("RTHIRD", yytext);
+                        printOpAndPunc("RTHIRD", yytext);
 }
 	YY_BREAK
 case 20:
 YY_RULE_SETUP
-#line 246 "1805047_lex_analyzer.l"
+#line 274 "1805047_lex_analyzer.l"
 {
-                        printToken("COMMA", yytext);
+                        printOpAndPunc("COMMA", yytext);
 }
 	YY_BREAK
 case 21:
 YY_RULE_SETUP
-#line 249 "1805047_lex_analyzer.l"
+#line 277 "1805047_lex_analyzer.l"
 {
-                        printToken("SEMICOLON", yytext);
+                        printOpAndPunc("SEMICOLON", yytext);
 }
 	YY_BREAK
 case 22:
 YY_RULE_SETUP
-#line 253 "1805047_lex_analyzer.l"
+#line 281 "1805047_lex_analyzer.l"
 {
-                        printToken("ID", yytext);
+                        printID("ID", yytext);
 }
 	YY_BREAK
 case 23:
 YY_RULE_SETUP
-#line 258 "1805047_lex_analyzer.l"
+#line 286 "1805047_lex_analyzer.l"
 {
                         BEGIN state_string;
                         // printf("starting string state\n");
@@ -1201,7 +1229,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 24:
 YY_RULE_SETUP
-#line 263 "1805047_lex_analyzer.l"
+#line 291 "1805047_lex_analyzer.l"
 {
                         BEGIN INITIAL;
 
@@ -1213,7 +1241,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 25:
 YY_RULE_SETUP
-#line 272 "1805047_lex_analyzer.l"
+#line 300 "1805047_lex_analyzer.l"
 {
                     //    printf("\nhandled\n");
                        taking_string += yytext;
@@ -1222,7 +1250,7 @@ YY_RULE_SETUP
 case 26:
 /* rule 26 can match eol */
 YY_RULE_SETUP
-#line 277 "1805047_lex_analyzer.l"
+#line 305 "1805047_lex_analyzer.l"
 {
                     //    printf("\nhandled\n");
                        taking_string += yytext;
@@ -1231,7 +1259,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 27:
 YY_RULE_SETUP
-#line 283 "1805047_lex_analyzer.l"
+#line 311 "1805047_lex_analyzer.l"
 {
                         // cout << "printing " << yytext << " " << (int)yytext[0] << endl;
                         taking_string += yytext;
@@ -1240,7 +1268,7 @@ YY_RULE_SETUP
 case 28:
 /* rule 28 can match eol */
 YY_RULE_SETUP
-#line 287 "1805047_lex_analyzer.l"
+#line 315 "1805047_lex_analyzer.l"
 {
                         // cout << "unfinished_string" << endl;
                         printErrorLog("unfinished string");
@@ -1250,7 +1278,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 29:
 YY_RULE_SETUP
-#line 297 "1805047_lex_analyzer.l"
+#line 325 "1805047_lex_analyzer.l"
 {
                         BEGIN state_single_line_comment;
                         taking_string = yytext;
@@ -1259,7 +1287,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 30:
 YY_RULE_SETUP
-#line 303 "1805047_lex_analyzer.l"
+#line 331 "1805047_lex_analyzer.l"
 {
                         line_count++;
                         taking_string += yytext;
@@ -1269,7 +1297,7 @@ YY_RULE_SETUP
 case 31:
 /* rule 31 can match eol */
 YY_RULE_SETUP
-#line 309 "1805047_lex_analyzer.l"
+#line 337 "1805047_lex_analyzer.l"
 {
                         line_count++;
                         taking_string += yytext;
@@ -1280,7 +1308,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 32:
 YY_RULE_SETUP
-#line 317 "1805047_lex_analyzer.l"
+#line 345 "1805047_lex_analyzer.l"
 {
                         BEGIN state_multi_line_comment;
                         taking_string = yytext;
@@ -1289,7 +1317,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 33:
 YY_RULE_SETUP
-#line 323 "1805047_lex_analyzer.l"
+#line 351 "1805047_lex_analyzer.l"
 {
                         BEGIN INITIAL;
                         taking_string += yytext;
@@ -1300,7 +1328,7 @@ YY_RULE_SETUP
 case 34:
 /* rule 34 can match eol */
 YY_RULE_SETUP
-#line 329 "1805047_lex_analyzer.l"
+#line 357 "1805047_lex_analyzer.l"
 {
                         // cout << yytext << endl;
                         taking_string += yytext;
@@ -1310,7 +1338,7 @@ YY_RULE_SETUP
 }
 	YY_BREAK
 case YY_STATE_EOF(state_multi_line_comment):
-#line 336 "1805047_lex_analyzer.l"
+#line 364 "1805047_lex_analyzer.l"
 {
                         printErrorLog("unfinished comment");
                         // cout << "unfinished_comment" << endl;
@@ -1319,7 +1347,7 @@ case YY_STATE_EOF(state_multi_line_comment):
 	YY_BREAK
 case 35:
 YY_RULE_SETUP
-#line 342 "1805047_lex_analyzer.l"
+#line 370 "1805047_lex_analyzer.l"
 {
                         // cout << yytext << endl;
                         // cout << "decimal_point_error" << endl;
@@ -1328,7 +1356,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 36:
 YY_RULE_SETUP
-#line 348 "1805047_lex_analyzer.l"
+#line 376 "1805047_lex_analyzer.l"
 {
                         // cout << yytext << endl;
                         // cout << "ill_formed_number" << endl;
@@ -1337,7 +1365,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 37:
 YY_RULE_SETUP
-#line 354 "1805047_lex_analyzer.l"
+#line 382 "1805047_lex_analyzer.l"
 {
                         // cout << yytext << endl;
                         // cout << "non id" << endl;
@@ -1347,7 +1375,7 @@ YY_RULE_SETUP
 case 38:
 /* rule 38 can match eol */
 YY_RULE_SETUP
-#line 360 "1805047_lex_analyzer.l"
+#line 388 "1805047_lex_analyzer.l"
 {
                         // cout << yytext << endl;
                         // cout << "multi_character_constant_error" << endl;
@@ -1357,7 +1385,7 @@ YY_RULE_SETUP
 case 39:
 /* rule 39 can match eol */
 YY_RULE_SETUP
-#line 366 "1805047_lex_analyzer.l"
+#line 394 "1805047_lex_analyzer.l"
 {
                         // cout << yytext << endl;
                         string str = yytext;
@@ -1370,7 +1398,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 40:
 YY_RULE_SETUP
-#line 376 "1805047_lex_analyzer.l"
+#line 404 "1805047_lex_analyzer.l"
 {
                         // cout << yytext << endl;
                         // cout << "empty_character" << endl;
@@ -1379,7 +1407,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 41:
 YY_RULE_SETUP
-#line 382 "1805047_lex_analyzer.l"
+#line 410 "1805047_lex_analyzer.l"
 {
                             // cout<< "unrecognized_character" << endl;
                             printErrorLog("unrecognized character");
@@ -1387,10 +1415,10 @@ YY_RULE_SETUP
 	YY_BREAK
 case 42:
 YY_RULE_SETUP
-#line 388 "1805047_lex_analyzer.l"
+#line 416 "1805047_lex_analyzer.l"
 ECHO;
 	YY_BREAK
-#line 1394 "1805047_lex_analyzer.c"
+#line 1422 "1805047_lex_analyzer.c"
 case YY_STATE_EOF(INITIAL):
 case YY_STATE_EOF(state_string):
 case YY_STATE_EOF(state_single_line_comment):
@@ -2398,7 +2426,7 @@ void yyfree (void * ptr )
 
 #define YYTABLES_NAME "yytables"
 
-#line 388 "1805047_lex_analyzer.l"
+#line 416 "1805047_lex_analyzer.l"
 
 
 
