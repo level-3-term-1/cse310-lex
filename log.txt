@@ -1,66 +1,49 @@
-Error at Line no 2: unfinished string
-Error at Line no 3: unrecognized character
-Line no 4: Token <ID> Lexeme fsjdlkfj found
-Error at Line no 4: unfinished string
-Error at Line no 5: decimal point error
-Error at Line no 6: decimal point error
-Error at Line no 7: ill formed number
-Line no 8: Token <CONST_FLOAT> Lexeme 4.3 found
-Line no 9: Token <CONST_FLOAT> Lexeme .3654 found
-Error at Line no 10: invalid identifier
-Error at Line no 11: empty character
-Line no 12: Token <CONST_FLOAT> Lexeme E12 found
-Line no 13: Token <CONST_FLOAT> Lexeme .3E12 found
-Line no 15: Token COMMENT Lexeme //1.4.1E-24.12.9\
-
-Error at Line no 18: ill formed number
-Line no 19: Token <CONST_FLOAT> Lexeme 1E32 found
-Error at Line no 20: invalid identifier
-Line no 21: Token <ID> Lexeme abcd12 found
-Line no 23: Token <INT> Lexeme int found
-Line no 23: Token <ID> Lexeme main found
-Line no 23: Token <LPAREN> Lexeme ( found
-Line no 23: Token <RPAREN> Lexeme ) found
-Line no 23: Token <LCURL> Lexeme { found
-Line no 24: Token <INT> Lexeme int found
-Line no 24: Token <ID> Lexeme a found
-Line no 24: Token <COMMA> Lexeme , found
-Line no 24: Token <ID> Lexeme b found
-Line no 24: Token <SEMICOLON> Lexeme ; found
-Line no 25: Token <ID> Lexeme a found
-Line no 25: Token <ASSIGNOP> Lexeme = found
-Line no 25: Token <ID> Lexeme a found
-Line no 25: Token <ADDOP> Lexeme + found
-Line no 25: Token <CONST_INT> Lexeme 1 found
-Line no 25: Token <SEMICOLON> Lexeme ; found
-Line no 26: Token <CHAR> Lexeme char found
-Line no 26: Token <ID> Lexeme ch found
-Line no 26: Token <ASSIGNOP> Lexeme = found
-Line no 26: Token <CONST_CHAR> Lexeme a found
-Line no 26: Token <SEMICOLON> Lexeme ; found
-Line no 27: Token <ID> Lexeme ch found
-Line no 27: Token <ASSIGNOP> Lexeme = found
-Line no 27: Token <CONST_CHAR> Lexeme 	 found
-Line no 27: Token <SEMICOLON> Lexeme ; found
-Line no 28: Token <CHAR> Lexeme char found
-Line no 28: Token <ID> Lexeme c found
-Line no 28: Token <LTHIRD> Lexeme [ found
-Line no 28: Token <RTHIRD> Lexeme ] found
-Line no 28: Token <ASSIGNOP> Lexeme = found
-Line no 28: Token <STRING> Lexeme ab\td found
-Line no 28: Token <SEMICOLON> Lexeme ; found
-Line no 29: Token <ID> Lexeme printf found
-Line no 29: Token <LPAREN> Lexeme ( found
-Line no 31: Token <STRING> Lexeme abc\
+Line no 1: Token <INT> Lexeme int found
+Line no 1: Token <ID> Lexeme main found
+Line no 1: Token <LPAREN> Lexeme ( found
+Line no 1: Token <RPAREN> Lexeme ) found
+Line no 1: Token <LCURL> Lexeme { found
+Line no 2: Token <INT> Lexeme int found
+Line no 2: Token <ID> Lexeme a found
+Line no 2: Token <COMMA> Lexeme , found
+Line no 2: Token <ID> Lexeme b found
+Line no 2: Token <SEMICOLON> Lexeme ; found
+Line no 3: Token <ID> Lexeme a found
+Line no 3: Token <ASSIGNOP> Lexeme = found
+Line no 3: Token <ID> Lexeme a found
+Line no 3: Token <ADDOP> Lexeme + found
+Line no 3: Token <CONST_INT> Lexeme 1 found
+Line no 3: Token <SEMICOLON> Lexeme ; found
+Line no 4: Token <CHAR> Lexeme char found
+Line no 4: Token <ID> Lexeme ch found
+Line no 4: Token <ASSIGNOP> Lexeme = found
+Line no 4: Token <CONST_CHAR> Lexeme a found
+Line no 4: Token <SEMICOLON> Lexeme ; found
+Line no 5: Token <ID> Lexeme ch found
+Line no 5: Token <ASSIGNOP> Lexeme = found
+Line no 5: Token <CONST_CHAR> Lexeme 	 found
+Line no 5: Token <SEMICOLON> Lexeme ; found
+Line no 6: Token <CHAR> Lexeme char found
+Line no 6: Token <ID> Lexeme c found
+Line no 6: Token <LTHIRD> Lexeme [ found
+Line no 6: Token <RTHIRD> Lexeme ] found
+Line no 6: Token <ASSIGNOP> Lexeme = found
+Line no 6: Token <STRING> Lexeme ab\td found
+Line no 6: Token <SEMICOLON> Lexeme ; found
+Line no 7: Token <ID> Lexeme printf found
+Line no 7: Token <LPAREN> Lexeme ( found
+Line no 9: Token <STRING> Lexeme abc\
 def\
 ghi found
-Line no 31: Token <RPAREN> Lexeme ) found
-Line no 31: Token <SEMICOLON> Lexeme ; found
-Line no 33: Token COMMENT Lexeme // a comment
+Line no 9: Token <RPAREN> Lexeme ) found
+Line no 9: Token <SEMICOLON> Lexeme ; found
+Line no 11: Token COMMENT Lexeme // a comment
 
-Line no 34: Token COMMENT Lexeme /** another
+Line no 12: Token COMMENT Lexeme /** another
 *** comment ***/
-Line no 35: Token <RETURN> Lexeme return found
-Line no 35: Token <CONST_INT> Lexeme 0 found
-Line no 35: Token <SEMICOLON> Lexeme ; found
-Line no 36: Token <RCURL> Lexeme } found
+Line no 13: Token <RETURN> Lexeme return found
+Line no 13: Token <CONST_INT> Lexeme 0 found
+Line no 13: Token <SEMICOLON> Lexeme ; found
+Line no 14: Token <RCURL> Lexeme } found
+Total lines: 14
+Total errors: 0

@@ -14,6 +14,7 @@
 using namespace std;
 
 int line_count=1;
+int error_count = 0;
 string taking_string = "";
 
 FILE *logout;
@@ -104,6 +105,7 @@ char convertStringToChar(string str){
 
 void printErrorLog(string str){
     fprintf(logout, "Error at Line no %d: %s\n", line_count, str.c_str());
+    error_count++;
 }
 
 void printCommentLog(){
@@ -405,9 +407,10 @@ int main(int argc,char *argv[]){
 
 	yyin= fin;
 	yylex();
+    fprintf(logout, "Total lines: %d\n", line_count);
+    fprintf(logout, "Total errors: %d\n", error_count);
 	fclose(yyin);
 	fclose(tokenout);
 	fclose(logout);
-    printf("%d\n", line_count);
 	return 0;
 }
